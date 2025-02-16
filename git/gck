@@ -1,0 +1,24 @@
+#!/bin/sh
+
+branches=$(git branch -vv)
+branch_names=$(git branch)
+
+if [ -z "$branches" ]; then
+  echo "No local branches"
+  exit 0
+fi
+
+echo "Local branches:"
+echo "$branches" | nl
+
+read -p "Select branch to checkout: " branch_number
+
+selected_branch=$(echo "$branch_names" | sed -n "${branch_number}p")
+
+if [ -z "$selected_branch" ]; then
+  echo "Invalid selection."
+  exit 1
+fi
+
+echo "You selected: $selected_branch"
+git checkout $selected_branch
