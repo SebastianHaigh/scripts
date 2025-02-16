@@ -1,0 +1,59 @@
+#!/bin/sh
+
+dev_dir="$HOME/dev"
+
+dev_options=$(ls "$dev_dir")
+
+declare -A option_map
+option_counter=1
+
+for option in $dev_options; do
+
+  dir_path="$dev_dir/$option"
+
+  #if [[ -d "$dir_path/.git" ]]; then
+
+    branch_name=$(git -C "$dir_path" rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+    option_map[$option_counter]="$option"
+
+    echo "$option_counter. $option ($branch_name)"
+
+    ((option_counter++))
+  #fi
+
+done
+
+read -p "Select directory: " user_selection
+selected=${option_map[$user_selection]}
+
+if [[ -n $selected ]]; then
+  echo "You selected: $selected"
+else
+  echo "Bad option"
+  exit
+fi
+
+session_dir="$dev_dir/$selected"
+
+directory_name=$(basename "$session_dir" | tr . _)
+
+if ! tmux has-session -t=$directory_name 2> /dev/null; then
+
+  echo "No session called "$directory_name
+
+  tmux new-session -d -c $session_dir -s $directory_name -n "code" nvim -S
+
+  build_dir=$session_dir
+  build_dir+="/Debug"
+
+  tmux new-window -d -c $build_dir -n "build" -t $directory_name
+  tmux new-window -d -c $session_dir -n "git" -t $directory_name
+  tmux new-window -d -c $session_dir -n "grep" -t $directory_name
+  tmux new-window -d -c ~/notes -n "notes" -t $directory_name nvim .
+  tmux new-window -d -c ~/todo -n "todo" -t $directory_name nvim .
+
+fi
+
+tmux switch-client -t $directory_name
+
