@@ -1,0 +1,31 @@
+#!/bin/sh
+
+files=$(git status --porcelain | grep '\( M\|MM\)' | awk '{print $NF}')
+
+if [ -z "$files" ]; then
+  echo "No modified files to restore."
+  exit 0
+fi
+
+echo "Modified files:"
+echo "$files" | nl
+
+read -p "Select file to restore: " file_number
+
+selected_file=$(echo "$files" | sed -n "${file_number}p")
+
+if [ -z "$selected_file" ]; then
+  echo "Invalid selection."
+  exit 1
+fi
+
+echo "File selected for restore: $selected_file"
+
+read -p "Please confirm (y/n): " confirmation
+
+if [ "$confirmation" != "y" ]; then
+  echo "Operation cancelled."
+  exit 1
+fi
+
+git restore -p $selected_file

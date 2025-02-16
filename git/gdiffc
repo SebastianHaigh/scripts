@@ -1,0 +1,22 @@
+#!/bin/sh
+
+last_merge_commit_hash=$(git log --merges -n 1 --format="%H")
+
+log=$(git log --oneline $last_merge_commit_hash..HEAD)
+
+echo "$log" | nl
+
+numLogEntries=$(echo "$log" | wc -l)
+
+read -p "Select a commit to diff: " commit_number
+
+if [ "$commit_number" -gt "$numLogEntries" ]; then
+  echo "Invalid selection."
+  exit 1
+fi
+
+target_hash=$(git log -n 1 HEAD~$((commit_number-1)) --format="%H")
+
+echo "You selected: $target_hash"
+
+git diff $target_hash^ $target_hash

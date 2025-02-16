@@ -1,0 +1,24 @@
+#!/bin/sh
+
+files=$(git status --porcelain | grep '\( M\|MM\)' | awk '{print $NF}')
+
+if [ -z "$files" ]; then
+  echo "No modified files to add."
+  exit 0
+fi
+
+echo "Modified files:"
+echo "$files" | nl
+
+read -p "Select file to add: " file_number
+
+selected_file=$(echo "$files" | sed -n "${file_number}p")
+
+if [ -z "$selected_file" ]; then
+  echo "Invalid selection."
+  exit 1
+fi
+
+echo "You selected: $selected_file"
+
+git add -p $selected_file

@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# First check if there are staged changes, only proceed if there are.
+numFilesStaged=$(git diff --cached --name-only | wc -l)
+
+if [ "$numFilesStaged" -le 0 ]; then
+  echo "No changes staged."
+  exit 0
+fi
+
+echo "Files staged for commit: $numFilesStaged"
+
+last_merge_commit_hash=$(git log --merges -n 1 --format="%H")
+
+# Get the log for the last 20 commits and print it as a numbered list menu
+log=$(git log --oneline $last_merge_commit_hash..HEAD)
+
+echo "$log" | nl
+
+numLogEntries=$(echo "$log" | wc -l)
+
+read -p "Select a commit to fixup: " commit_number
+
+if [ "$commit_number" -gt "$numLogEntries" ]; then
+  echo "Invalid selection."
+  exit 1
+fi
+
+target_commit_message=$(git log -n 1 HEAD~$((commit_number-1)))
+
+echo "Commit selected for commit:"
+echo "$target_commit_message"
+
+read -p "Please confirm (y/n): " confirmation
+
+if [ "$confirmation" != "y" ]; then
+  echo "Operation cancelled."
+  exit 1
+fi
+
+fixup_target_hash=$(git log -n 1 HEAD~$((commit_number-1)) --format="%H")
+
+echo "Will proceed to fix up commit $fixup_target_hash"
+
+git commit --fixup=$fixup_target_hash
+git rebase -i $fixup_target_hash^
+
+
+
+

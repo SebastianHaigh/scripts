@@ -1,0 +1,25 @@
+#!/bin/sh
+
+dev_dir="$HOME/dev"
+
+dev_options=$(ls "$dev_dir")
+
+option_counter=1
+
+for option in $dev_options; do
+
+  dir_path="$dev_dir/$option"
+
+  if [[ -d "$dir_path/.git" ]]; then
+
+    local_branch_list=$(git -C "$dir_path" branch -v 2>/dev/null)
+
+    echo "$option_counter. $option"
+    echo "$local_branch_list"
+    echo ""
+
+    ((option_counter++))
+  fi
+
+done
+
