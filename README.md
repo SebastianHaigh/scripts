@@ -69,8 +69,21 @@ Select a commit to start rebase:
 
 Selecting a commit will run `git rebase -i <selected commit>^` starting an interactive rebase session for the selected commit and all more recent commits.
 
+### gfix: git fixup
 
-### `gck`: git checkout
+The `gfix` script will output a numbered list of commits, for all commits upto, but not including, the most recent merge commit in the history. Commits are listed in order starting with the most recent.
+
+```
+> gfix
+     1  c25a503dd4 Add support for X
+     2  430f4f2d32 Make change to Y
+     3  8e5550cda9 Move function X to file Z
+Select a commit to fixup:
+```
+
+Selecting a commit will create a fixup commit from all currently staged changes. The fixup will target the selected commit.
+
+### gck: git checkout
 
 The `gck` script will output a numbered list of local branches.
 
